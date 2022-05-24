@@ -23,6 +23,7 @@ let userSchema = new Schema({
             dayOfWeek: Number,
             recurring: Boolean,
             noteDocument: {
+                noteID: Number,
                 noteTitle: String,
                 noteText: String,
                 creationDate: {type: Date, default: Date.now()},
@@ -41,6 +42,7 @@ let userSchema = new Schema({
     },
     noteCollection: {
         noteDocument: {
+            noteID: Number,
             noteTitle: String,
             noteText: String,
             creationDate: Date,
