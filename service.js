@@ -12,7 +12,41 @@ let userSchema = new Schema({
         unique: true
     },
     password: String,
-    favourites: [String]
+    schedule: { 
+        Event: 
+		{
+            eventId: Number, 
+            eventTitle: String, 
+            startTime: String, 
+            endTime: String, 
+            date: {type: Date, default: Date.now()}, 
+            dayOfWeek: Number,
+            recurring: Boolean,
+            noteDocument: {
+                noteTitle: String,
+                noteText: String,
+                creationDate: {type: Date, default: Date.now()},
+                lastEditedDate: Date,
+                heading: { title: String, lineNum: Number},
+                subHeading: { title: String, lineNum: Number},
+            },
+            Timer: {
+                timerID: Number,
+                timerTitle: String,
+                timerDuration: Number,
+                break: Boolean,
+                breakDuration: Number
+            }
+        }
+    },
+    noteCollection: {
+        noteDocument: {
+            noteTitle: String,
+            noteText: String,
+            creationDate: Date,
+            lastEditedDate: Date
+        }
+    }
 });
 
 let User;
@@ -26,7 +60,7 @@ module.exports.connect = function () {
         });
 
         db.once('open', () => {
-            User = db.model("users", userSchema);
+            User = db.model("Account", userSchema);
             resolve();
         });
     });
