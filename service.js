@@ -12,45 +12,35 @@ let userSchema = new Schema({
         unique: true
     },
     password: String,
-    schedule: { 
-        Event: 
-		{
-            eventId: Number, 
-            eventTitle: String, 
-            startTime: String, 
-            endTime: String, 
-            date: {type: Date, default: Date.now()}, 
-            dayOfWeek: Number,
-            recurring: Boolean,
-            noteDocument: {
-                noteID: Number,
-                noteTitle: String,
-                noteText: String,
-                creationDate: {type: Date, default: Date.now()},
-                lastEditedDate: Date,
-                heading: { title: String, lineNum: Number},
-                subHeading: { title: String, lineNum: Number},
-            },
-            Timer: {
-                timerID: Number,
-                timerTitle: String,
-                timerDuration: Number,
-                break: Boolean,
-                breakDuration: Number
-            }
-        }
-    },
-    noteCollection: {
-        noteDocument: {
+    event: 
+    [{
+        eventId: Number, 
+        eventTitle: String, 
+        startTime: String, 
+        endTime: String, 
+        date: {type: Date, default: Date.now()}, 
+        dayOfWeek: Number,
+        recurring: Boolean, 
+        noteForEvent: 
+        {
             noteID: Number,
             noteTitle: String,
             noteText: String,
-            creationDate: Date,
-            lastEditedDate: Date
-        }
-    }
+            creationDate: {type: Date, default: Date.now()},
+            lastEditedDate: Date,
+            heading: { title: String, lineNum: Number},
+            subHeading: { title: String, lineNum: Number},
+        },
+        timer: 
+        [{
+            timerID: Number,
+            timerTitle: String,
+            timerDuration: Number,
+            breaks: Boolean,
+            breakDuration: Number
+        }]
+    }]
 });
-
 let User;
 
 module.exports.connect = function () {
@@ -62,7 +52,7 @@ module.exports.connect = function () {
         });
 
         db.once('open', () => {
-            User = db.model("Account", userSchema);
+            User = db.model("Account", userSchema);  
             resolve();
         });
     });
@@ -118,3 +108,23 @@ module.exports.checkUser = function (userData) {
             });
     });
 };
+//EVENTS
+//TODO: create new event
+
+//TODO: edit event
+
+//TODO: delete event
+
+//NOTES
+//TODO: create new notes
+
+//TODO: edit notes
+
+//TODO: delete notes
+
+//TIMER
+//TODO: create new timer
+
+//TODO: edit timer
+
+//TODO: delete timer
