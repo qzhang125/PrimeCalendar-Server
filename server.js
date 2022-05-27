@@ -57,6 +57,46 @@ app.post("/api/user/login",(req,res)=>{
     });
 });
 
+app.get("/api/user/events/:id/timers",passport.authenticate('jwt', { session: false }), (req, res) =>{
+    userService.getTimer(req.user._id,req.params.id)
+    .then((timers)=>{
+        res.json(timers);
+    })
+    .catch(err=>{
+        res.json({"message":err})
+    })
+})
+
+app.post("/api/user/events/:id/timers/add",passport.authenticate('jwt', { session: false }), (req, res) =>{
+    userService.addTimer(req.user._id,req.params.id,req.body)
+    .then((timers)=>{
+        res.json(timers);
+    })
+    .catch(err=>{
+        res.json({"message":err})
+    })
+})
+
+app.put("/api/user/events/:id/timers/:timerId",authenticate('jwt', { session: false }), (req, res) =>{
+    userService.editTimer(req.user._id,req.params.timerId,req.body)
+    .then((timers)=>{
+        res.json(timers);
+    })
+    .catch(err=>{
+        res.json({"message":err})
+    })
+})
+
+app.delete("/api/user/events/:id/timers/:timerId",authenticate('jwt', { session: false }), (req, res) =>{
+    userService.deleteTimer(req.user._id,req.params.timerId)
+    .then((timers)=>{
+        res.json(timers);
+    })
+    .catch(err=>{
+        res.json({"message":err})
+    })
+})
+
 userService.connect()
 .then(() => {
     app.listen(HTTP_PORT, () => { console.log("API listening on: " + HTTP_PORT) });

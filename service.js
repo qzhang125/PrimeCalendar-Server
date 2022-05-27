@@ -123,8 +123,40 @@ module.exports.checkUser = function (userData) {
 //TODO: delete notes
 
 //TIMER
+//TODO: get timer
+module.exports.getTimer = function(id,eventId){
+    User.find({_id:id,"event.eventId":eventId}).exec()
+        .then(user => {resolve(user.event.timer)})
+        .catch(err=>{reject(`Unable to get timer with error: ${err}`)})
+}
 //TODO: create new timer
-
+module.exports.addTimer = function(id,eventId,timerData){
+    User.findOneAndUpdate({_id:id,"event.eventId":eventId},
+        {$addToSet:{"timer.timerID":timerData.timerId,
+                    "timer.timerTitle":timerData.timerTitle,
+                    "timer.timerDuration":timerData.duration,
+                    "timer.breaks":timerData.breaks,
+                    "timer.breakDuration":timerData.breakDuration}},
+        {new:true}).exec()
+        .then(user => {resolve(user.event.timer)})
+        .catch(err=>{reject(`Unable to add timer with error: ${err}`)})
+}
 //TODO: edit timer
-
+module.exports.editTimer = function(id,timerId,timerData){
+    User.findOneAndUpdate({_id:id,"timer.timerID":timerId},
+        {$Set:{     "timer.timerTitle":timerData.timerTitle,
+                    "timer.timerDuration":timerData.duration,
+                    "timer.breaks":timerData.breaks,
+                    "timer.breakDuration":timerData.breakDuration}},
+        {new:true}).exec()
+        .then(user => {resolve(user.event.timer)})
+        .catch(err=>{reject(`Unable to edit timer with error: ${err}`)})
+}
 //TODO: delete timer
+module.exports.deleteTimer = function(id,timerId){
+    User.findOneAndUpdate({_id:id,"timer.timerID":timerId},
+        {$pull:{"timer.timerID":timerId}},
+        {new:true}).exec()
+        .then(user => {resolve(user.event.timer)})
+        .catch(err=>{reject(`Unable to delete timer with error: ${err}`)})
+}
