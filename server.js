@@ -57,6 +57,45 @@ app.post("/api/user/login",(req,res)=>{
     });
 });
 
+
+
+
+//TODO: Create note route
+app.post("/api/user/notes", passport.authenticate('jwt',{session: false}), (req, res)=>{
+    userService.createNotes(req.body).then(()=>{
+        res.json({message: "Resolve sucessful"});
+    }).catch(err=>{
+        res.status(422).json({message: err});
+    });
+});
+
+//TODO: Update note route
+app.put("/api/user/notes/:id",(req, res)=>{
+    userService.updateNotes(req.body, req.params.id).then((data)=>{
+        res.json(data);
+    }).catch(()=>{
+        res.status(500).end();
+    });
+});
+
+//TODO: Delete note route
+app.delete("/api/user/notes/:id", passport.authenticate('jwt', {session: false}), (req, res)=>{
+    userService.removeNotes(req.user._id, req.params.id).then((data)=>{
+        res.json(data);
+    }).catch(()=>{
+        res.status(500).end();
+    });
+});
+
+//TODO: Display note route
+app.get("/api/user/notes/:id",(req, res)=>{
+    userService.getNotes(req.params.id).then((data)=>{
+        res.json(data);
+    }).catch(()=>{
+        res.status(500).end();
+    });
+});
+
 userService.connect()
 .then(() => {
     app.listen(HTTP_PORT, () => { console.log("API listening on: " + HTTP_PORT) });

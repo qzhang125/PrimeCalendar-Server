@@ -117,11 +117,65 @@ module.exports.checkUser = function (userData) {
 
 //NOTES
 //TODO: create new notes
+module.exports.createNotes = function (noteContent) {
 
-//TODO: edit notes
+    return new Promise(function (resolve, reject) {
 
+        let newNote = new User(noteContent);
+
+        newNote.save(err => {
+            if (err) {
+                reject("There was an error creating the note: " + err);
+            } else {
+                resolve("New note is successfully created");
+            }
+        });
+    });
+}
+
+//TODO: update notes
+module.exports.updateNotes = function (data, id) {
+
+    return new Promise(function (resolve, reject) {
+
+        User.findById(id).exec().then(user => {
+                User.event.noteForEvent.findByIdAndUpdate(id,
+                    { $Set: {noteText: data } }
+                ).exec()
+                    .then(user => { resolve(user.event.noteForEvent); })
+                    .catch(err => { reject(`Unable to update the note for user with id: ${id}`); })
+        })
+
+    });
+
+}
 //TODO: delete notes
-
+module.exports.removeNotes = function (id, noteID) {
+    return new Promise(function (resolve, reject) {
+        User.findByIdAndUpdate(id,
+            { $pull: { noteForEvent: noteID } },
+            { new: true }
+        ).exec()
+            .then(user => {
+                resolve(user.event.noteForEvent);
+            })
+            .catch(err => {
+                reject(`Unable to delete the note for user with id: ${id}`);
+            })
+    });
+}
+//TODO: display notes
+module.exports.getNotes = function (id) {
+    return new Promise(function (resolve, reject) {
+        User.findById(id)
+            .exec()
+            .then(user => {
+                resolve(user.event.noteForEvent)
+            }).catch(err => {
+                reject(`Unable to get notes for user with id: ${id}`);
+            });
+    });
+}
 //TIMER
 //TODO: create new timer
 
