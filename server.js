@@ -58,46 +58,78 @@ app.post("/api/user/login",(req,res)=>{
 });
 
 
-
-
-//TODO: Create note route
-app.post("/api/user/notes", passport.authenticate('jwt',{session: false}), (req, res)=>{
-    userService.createNotes(req.body).then(()=>{
-        res.json({message: "Resolve sucessful"});
-    }).catch(err=>{
-        res.status(422).json({message: err});
-    });
-});
-
-//TODO: Update note route
-app.put("/api/user/notes/:id",(req, res)=>{
-    userService.updateNotes(req.body, req.params.id).then((data)=>{
+//add event
+app.post("/api/user/events/add", (req, res) =>{
+    //Hard code the user id for now to avoid JWT authentication issue
+    userService.addEvent("62929873d12bd9e6ecea6c51",req.body)
+    .then((data)=>{
         res.json(data);
-    }).catch(()=>{
-        res.status(500).end();
-    });
-});
+    })
+    .catch(err=>{
+        res.json({"message":err})
+    })
+})
 
-//TODO: Delete note route
-app.delete("/api/user/notes/:id", passport.authenticate('jwt', {session: false}), (req, res)=>{
-    userService.removeNotes(req.user._id, req.params.id).then((data)=>{
+//Create note
+app.post("/api/user/events/:id/notes/add", (req, res) =>{
+    //Hard code the user id for now to avoid JWT issue
+    userService.createNotes("62929873d12bd9e6ecea6c51",req.params.id,req.body)
+    .then((data)=>{
         res.json(data);
-    }).catch(()=>{
-        res.status(500).end();
-    });
-});
+    })
+    .catch(err=>{
+        res.json({"message":err})
+    })
+})
 
-//TODO: Display note route
-app.get("/api/user/notes/:id",(req, res)=>{
-    userService.getNotes(req.params.id).then((data)=>{
+//Update Note
+app.put("/api/user/events/:id/notes/:noteId", (req, res) =>{
+    userService.editNotes(req.params.noteId,req.body)
+    .then((notes)=>{
+        res.json(notes);
+    })
+    .catch(err=>{
+        res.json({"message":err})
+    })
+})
+
+//Get Note 
+app.get("/api/user/events/:id/notes", (req, res) =>{
+    userService.getNotes(req.params.id)
+    .then((data)=>{
         res.json(data);
-    }).catch(()=>{
-        res.status(500).end();
-    });
-});
+    })
+    .catch(err=>{
+        res.json({"message":err})
+    })
+})
 
-app.get("/api/user/events/:id/timers",passport.authenticate('jwt', { session: false }), (req, res) =>{
-    userService.getTimer(req.user._id,req.params.id)
+//Delete Note
+app.delete("/api/user/events/:id/notes/:noteId", (req, res) =>{
+    //Hard code the user id for now to avoid JWT issue
+    userService.deleteNotes("62929873d12bd9e6ecea6c51",req.params.noteId)
+    .then((notes)=>{
+        res.json(notes);
+    })
+    .catch(err=>{
+        res.json({"message":err})
+    })
+})
+
+//TODO: add timer
+app.post("/api/user/events/:id/timers/add", (req, res) =>{
+    userService.addTimer("62919f3e708365d5acecf1b3",req.params.id,req.body)
+    .then((data)=>{
+        res.json(data);
+    })
+    .catch(err=>{
+        res.json({"message":err})
+    })
+})
+
+//TODO: edit timer
+app.put("/api/user/events/:id/timers/:timerId", (req, res) =>{
+    userService.editTimer(req.params.timerId,req.body)
     .then((timers)=>{
         res.json(timers);
     })
@@ -106,8 +138,9 @@ app.get("/api/user/events/:id/timers",passport.authenticate('jwt', { session: fa
     })
 })
 
-app.post("/api/user/events/:id/timers/add",passport.authenticate('jwt', { session: false }), (req, res) =>{
-    userService.addTimer(req.user._id,req.params.id,req.body)
+//TODO: delete timer
+app.delete("/api/user/events/:id/timers/:timerId", (req, res) =>{
+    userService.deleteTimer("62919f3e708365d5acecf1b3",req.params.timerId)
     .then((timers)=>{
         res.json(timers);
     })
@@ -116,25 +149,19 @@ app.post("/api/user/events/:id/timers/add",passport.authenticate('jwt', { sessio
     })
 })
 
-app.put("/api/user/events/:id/timers/:timerId",passport.authenticate('jwt', { session: false }), (req, res) =>{
-    userService.editTimer(req.user._id,req.params.timerId,req.body)
-    .then((timers)=>{
-        res.json(timers);
+//TODO: Display timer route
+app.get("/api/user/events/:id/timers", (req, res) =>{
+    userService.getTimer(req.params.id)
+    .then((data)=>{
+        res.json(data);
     })
     .catch(err=>{
         res.json({"message":err})
     })
 })
 
-app.delete("/api/user/events/:id/timers/:timerId",passport.authenticate('jwt', { session: false }), (req, res) =>{
-    userService.deleteTimer(req.user._id,req.params.timerId)
-    .then((timers)=>{
-        res.json(timers);
-    })
-    .catch(err=>{
-        res.json({"message":err})
-    })
-})
+
+
 
 userService.connect()
 .then(() => {

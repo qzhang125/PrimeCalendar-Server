@@ -5,43 +5,48 @@ const bcrypt = require('bcryptjs');
 let mongoDBConnectionString = process.env.MONGO_URL;
 
 let Schema = mongoose.Schema;
-
 let userSchema = new Schema({
     userName: {
         type: String,
         unique: true
     },
     password: String,
-    event: 
-    [{
-        eventId: Number, 
-        eventTitle: String, 
-        startTime: String, 
-        endTime: String, 
-        date: {type: Date, default: Date.now()}, 
-        dayOfWeek: Number,
-        recurring: Boolean, 
-        noteForEvent: 
-        {
-            noteID: Number,
-            noteTitle: String,
-            noteText: String,
-            creationDate: {type: Date, default: Date.now()},
-            lastEditedDate: Date,
-            heading: { title: String, lineNum: Number},
-            subHeading: { title: String, lineNum: Number},
-        },
-        timer: 
-        [{
-            timerID: Number,
-            timerTitle: String,
-            timerDuration: Number,
-            breaks: Boolean,
-            breakDuration: Number
-        }]
-    }]
+    eventId: [String],
+    noteId:[String],
+    timerId:[String]
 });
+let eventSchema = new Schema({ 
+    eventTitle: String, 
+    startTime: String, 
+    endTime: String, 
+    date: {type: Date, default: Date.now()}, 
+    dayOfWeek: Number,
+    recurring: Boolean,
+    userId: String
+});
+let noteSchema = new Schema({ 
+    noteTitle: String,
+    noteText: String,
+    creationDate: {type: Date, default: Date.now()},
+    lastEditedDate: Date,
+    heading: { title: String, lineNum: Number},
+    subHeading: { title: String, lineNum: Number},
+    eventId:String,
+    userId: String
+});
+let timerSchema = new Schema({ 
+    timerTitle: String,
+    timerDuration: Number,
+    breaks: Boolean,
+    breakDuration: Number,
+    eventId: String,
+    userId:String
+});
+
 let User;
+let Event;
+let Note;
+let Timer;
 
 module.exports.connect = function () {
     return new Promise(function (resolve, reject) {
@@ -52,7 +57,10 @@ module.exports.connect = function () {
         });
 
         db.once('open', () => {
-            User = db.model("Account", userSchema);  
+            User = db.model("users", userSchema);  
+            Event = db.model("events", eventSchema);
+            Note = db.model("notes", noteSchema);  
+            Timer = db.model("timers", timerSchema);    
             resolve();
         });
     });
@@ -108,109 +116,144 @@ module.exports.checkUser = function (userData) {
             });
     });
 };
-//EVENTS
-//TODO: create new event
 
-//TODO: edit event
-
-//TODO: delete event
-
-//NOTES
-//TODO: create new notes
-module.exports.createNotes = function (noteContent) {
+/*NOTE*/
+//Create Note
+module.exports.createNotes = function (id,eventId,noteData) {
 
     return new Promise(function (resolve, reject) {
 
-        let newNote = new User(noteContent);
-
+        let newNote = new Note(noteData);
+        newNote.userId = id;
+        newNote.eventId = eventId;
         newNote.save(err => {
             if (err) {
                 reject("There was an error creating the note: " + err);
             } else {
-                resolve("New note is successfully created");
+                User.findByIdAndUpdate(id,{$addToSet: {noteId:newNote._id}},{new:true}).exec()
+                .then(data=>resolve(data))
+                .catch(err=>{reject("There was an error creating the note: " + err)})
             }
         });
     });
 }
 
-//TODO: update notes
-module.exports.updateNotes = function (data, id) {
+//upadate Note
+module.exports.editNotes = function(noteId,noteData){
+    return new Promise(function(resolve,reject){
+        Note.findByIdAndUpdate(noteId,
+            {$set:{noteTitle:noteData.noteTitle,
+            noteText: noteData.noteText,
+            lastEditedDate: noteData.lastEditedDate,
+            heading: noteData.heading,
+            subHeading: noteData.subHeading
+        }},{new:true}).exec()
+        .then(data=>resolve(data))
+        .catch(err=>reject(`Unable to update note, error: ${err}`))
+    })
+}
 
-    return new Promise(function (resolve, reject) {
-
-        User.findById(id).exec().then(user => {
-                User.event.noteForEvent.findByIdAndUpdate(id,
-                    { $Set: {noteText: data } }
-                ).exec()
-                    .then(user => { resolve(user.event.noteForEvent); })
-                    .catch(err => { reject(`Unable to update the note for user with id: ${id}`); })
+//Delete Note
+module.exports.deleteNotes = function(id,noteId){
+    return new Promise(function(resolve,reject){
+        Note.deleteOne({_id:noteId},function(err){
+            if(err){
+                reject("There was an error deleting the notes: " + err);
+            }else{
+                User.findByIdAndUpdate(id,{$pull: {noteId:noteId}},{new:true}).exec()
+                .then(data=>resolve(data))
+                .catch(err=>{reject("There was an error deleting the notes: " + err)})}
         })
-
-    });
-
-}
-//TODO: delete notes
-module.exports.removeNotes = function (id, noteID) {
-    return new Promise(function (resolve, reject) {
-        User.findByIdAndUpdate(id,
-            { $pull: { noteForEvent: noteID } },
-            { new: true }
-        ).exec()
-            .then(user => {
-                resolve(user.event.noteForEvent);
-            })
-            .catch(err => {
-                reject(`Unable to delete the note for user with id: ${id}`);
-            })
     });
 }
-//TODO: display notes
-module.exports.getNotes = function (id) {
+
+//Display note
+module.exports.getNotes = function (eventId) {
     return new Promise(function (resolve, reject) {
-        User.findById(id)
+        Note.find({eventId:eventId})
             .exec()
-            .then(user => {
-                resolve(user.event.noteForEvent)
+            .then(data => {
+                resolve(data)
             }).catch(err => {
-                reject(`Unable to get notes for user with id: ${id}`);
+                reject(`Unable to get the note, error: ${err}`);
             });
     });
 }
+
+
 //TIMER
-//TODO: get timer
-module.exports.getTimer = function(id,eventId){
-    User.find({_id:id,"event.eventId":eventId}).exec()
-        .then(user => {resolve(user.event.timer)})
-        .catch(err=>{reject(`Unable to get timer with error: ${err}`)})
+//prepare event:
+module.exports.addEvent = function(id,eventData){
+    return new Promise(function(resolve,reject){
+        let newEvent = new Event(eventData);
+        newEvent.userId = id;
+        newEvent.save(err=>{
+            if(err){
+                reject("There was an error creating the event: " + err);
+            }else{
+                User.findByIdAndUpdate(id,{$addToSet: {eventId:newEvent._id}},{new:true}).exec()
+                .then(data=>resolve(data))
+                .catch(err=>{reject("There was an error creating the event: " + err)})}
+        })
+    })
 }
+
 //TODO: create new timer
 module.exports.addTimer = function(id,eventId,timerData){
-    User.findOneAndUpdate({_id:id,"event.eventId":eventId},
-        {$addToSet:{"timer.timerID":timerData.timerId,
-                    "timer.timerTitle":timerData.timerTitle,
-                    "timer.timerDuration":timerData.duration,
-                    "timer.breaks":timerData.breaks,
-                    "timer.breakDuration":timerData.breakDuration}},
-        {new:true}).exec()
-        .then(user => {resolve(user.event.timer)})
-        .catch(err=>{reject(`Unable to add timer with error: ${err}`)})
+    return new Promise(function(resolve,reject){
+        let newTimer = new Timer(timerData);
+        newTimer.userId = id;
+        newTimer.eventId = eventId;
+        newTimer.save(err=>{
+            if(err){
+                reject("There was an error creating the timer: " + err);
+            }else{
+                User.findByIdAndUpdate(id,{$addToSet: {timerId:newTimer._id}},{new:true}).exec()
+                .then(data=>resolve(data))
+                .catch(err=>{reject("There was an error creating the event: " + err)})}
+        })
+    })
 }
+
 //TODO: edit timer
-module.exports.editTimer = function(id,timerId,timerData){
-    User.findOneAndUpdate({_id:id,"timer.timerID":timerId},
-        {$Set:{     "timer.timerTitle":timerData.timerTitle,
-                    "timer.timerDuration":timerData.duration,
-                    "timer.breaks":timerData.breaks,
-                    "timer.breakDuration":timerData.breakDuration}},
-        {new:true}).exec()
-        .then(user => {resolve(user.event.timer)})
-        .catch(err=>{reject(`Unable to edit timer with error: ${err}`)})
+module.exports.editTimer = function(timerId,timerData){
+    return new Promise(function(resolve,reject){
+        Timer.findByIdAndUpdate(timerId,
+            {$set:{timerTitle:timerData.timerTitle,
+            timerDuration:timerData.timerDuration,
+            breaks:timerData.breaks,
+        breakDuration:timerData.breakDuration}},{new:true}).exec()
+        .then(data=>resolve(data))
+        .catch(err=>reject(`Unable to update timer, error: ${err}`))
+    })
 }
+
 //TODO: delete timer
 module.exports.deleteTimer = function(id,timerId){
-    User.findOneAndUpdate({_id:id,"timer.timerID":timerId},
-        {$pull:{"timer.timerID":timerId}},
-        {new:true}).exec()
-        .then(user => {resolve(user.event.timer)})
-        .catch(err=>{reject(`Unable to delete timer with error: ${err}`)})
+    return new Promise(function(resolve,reject){
+        Timer.deleteOne({_id:timerId},function(err){
+            if(err){
+                reject("There was an error deleting the timer: " + err);
+            }else{
+                User.findByIdAndUpdate(id,{$pull: {timerId:timerId}},{new:true}).exec()
+                .then(data=>resolve(data))
+                .catch(err=>{reject("There was an error creating the event: " + err)})}
+        })
+    });
 }
+
+//TODO: get timer
+module.exports.getTimer = function (eventId) {
+    return new Promise(function (resolve, reject) {
+
+        Timer.find({eventId:eventId})
+            .exec()
+            .then(data => {
+                resolve(data)
+            }).catch(err => {
+                reject(`Unable to get timer, error: ${err}`);
+            });
+    });
+}
+
+
