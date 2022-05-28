@@ -1,12 +1,2 @@
-Delete http://localhost:8080/api/user/notes/6290387e612a1a3dd37f9fc9
+Get http://localhost:8080/api/user/events/62929995e946f659cdc884de/notes
 Content-Type: application/json
-
-{
-    "userName": "111",
-    "password": "111",
-    "event":[{
-        "noteForEvent":{
-            "noteText":"test note"
-        }
-    }]
-}
