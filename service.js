@@ -181,7 +181,7 @@ module.exports.getNotes = function (eventId) {
 }
 
 
-//TIMER
+//EVENT
 //prepare event:
 module.exports.addEvent = function(id,eventData){
     return new Promise(function(resolve,reject){
@@ -198,6 +198,51 @@ module.exports.addEvent = function(id,eventData){
     })
 }
 
+//update event
+module.exports.updateEvent = function(eventId,eventData){
+    return new Promise(function(resolve,reject){
+        Event.findByIdAndUpdate(eventId,
+            {$set:{eventTitle: eventData.eventTitle,
+                startTime:  eventData.startTime,
+                endTime: eventData.endTime,
+                date: eventData.date,
+                dayOfWeek : eventData.dayOfWeek,
+                recurring: eventData.recurring }},{new:true}).exec()
+        .then(data=>resolve(data))
+        .catch(err=>reject(`Unable to update event, error: ${err}`))
+    })
+}
+
+//deleteEvent
+module.exports.deleteEvent = function(id,eventId){
+    return new Promise(function(resolve,reject){
+        Event.deleteOne({_id:eventId},function(err){
+            if(err){
+                reject("There was an error deleting the event: " + err);
+            }else{
+                User.findByIdAndUpdate(id,{$pull: {eventId:eventId}},{new:true}).exec()
+                .then(data=>resolve(data))
+                .catch(err=>{reject("There was an error deleting the event: " + err)})}
+        })
+    });
+}
+
+//display event
+module.exports.getEvent = function (eventId) {
+    return new Promise(function (resolve, reject) {
+        Event.find({_id:eventId})
+            .exec()
+            .then(data => {
+                resolve(data)
+            }).catch(err => {
+                reject(`Unable to get the event, error: ${err}`);
+            });
+    });
+}
+
+
+
+//TIMER
 //TODO: create new timer
 module.exports.addTimer = function(id,eventId,timerData){
     return new Promise(function(resolve,reject){
