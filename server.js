@@ -70,6 +70,40 @@ app.post("/api/user/events/add", (req, res) =>{
     })
 })
 
+//update Event
+app.put("/api/user/events/:id", (req, res) =>{
+    userService.updateEvent(req.params.id,req.body)
+    .then((event)=>{
+        res.json(event);
+    })
+    .catch(err=>{
+        res.json({"message":err})
+    })
+})
+
+//getEvent
+app.get("/api/user/events/:id", (req, res) =>{
+    userService.getEvent(req.params.id)
+    .then((data)=>{
+        res.json(data);
+    })
+    .catch(err=>{
+        res.json({"message":err})
+    })
+})
+
+//Delete Event
+app.delete("/api/user/events/:id", (req, res) =>{
+    //Hard code the user id for now to avoid JWT issue
+    userService.deleteEvent("62929873d12bd9e6ecea6c51",req.params.id)
+    .then((events)=>{
+        res.json(events);
+    })
+    .catch(err=>{
+        res.json({"message":err})
+    })
+})
+
 //Create note
 app.post("/api/user/events/:id/notes/add", (req, res) =>{
     //Hard code the user id for now to avoid JWT issue
