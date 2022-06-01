@@ -59,9 +59,9 @@ app.post("/api/user/login",(req,res)=>{
 
 
 //add event
-app.post("/api/user/events/add", (req, res) =>{
+app.post("/api/user/events/add", passport.authenticate('jwt', {session: false}), (req, res) =>{
     //Hard code the user id for now to avoid JWT authentication issue
-    userService.addEvent("62929873d12bd9e6ecea6c51",req.body)
+    userService.addEvent(req.user._id,req.body)
     .then((data)=>{
         res.json(data);
     })
