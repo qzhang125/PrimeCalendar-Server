@@ -38,7 +38,7 @@ app.use(express.json());
 app.use(cors());
 // Method 1 CORS
 app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "http://localhost:4200"); //add deployed front-end url after
+    res.header("Access-Control-Allow-Origin", "http://localhost:4200", "https://cool-kringle-5f7efa.netlify.app"); //add deployed front-end url after
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
   });
