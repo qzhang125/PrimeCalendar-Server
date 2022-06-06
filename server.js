@@ -51,7 +51,8 @@ app.use(express.json());
 
 // Method 3
 const corsOptionsDelegate = function (req, callback) {
-    const allowlist = [`http://localhost:4200`, `https://cool-kringle-5f7efa.netlify.app`, `https://fascinating-meringue-45e4dd.netlify.app`]
+    // const allowlist = [`http://localhost:4200`, `https://cool-kringle-5f7efa.netlify.app`, `https://fascinating-meringue-45e4dd.netlify.app`]
+    const allowlist = [`https://fascinating-meringue-45e4dd.netlify.app`]
     let corsOptions;
     if (allowlist.indexOf(req.header('Origin')) !== -1) {
         corsOptions = { origin : true }
