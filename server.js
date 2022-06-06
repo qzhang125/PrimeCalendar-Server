@@ -34,15 +34,14 @@ passport.use(strategy);
 app.use(passport.initialize());
 app.use(express.json());
 
-app.use(cors());
-// Method 1 CORS
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "http://localhost:4200"); //add deployed front-end url after
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-  });
-
-// IGNORE BELOW - WILL CLEAN LATER
+// IGNORE WILL CLEAN LATER
+// app.use(cors());
+// // Method 1 CORS
+// app.use(function(req, res, next) {
+//     res.header("Access-Control-Allow-Origin", "http://localhost:4200"); //add deployed front-end url after
+//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+//     next();
+//   });
 // Method 2 - add  cors(corsOptions), to relevant routes
 // var corsOptions = {
 //     origin: 'http://localhost:4200',
@@ -50,17 +49,17 @@ app.use(function(req, res, next) {
 // }
 
 // Method 3 - comment out line 37 if using, non-functional atm
-// const corsOptionsDelegate = function (req, callback) {
-//     const allowlist = [`http://localhost:4200`]
-//     let corsOptions;
-//     if (allowlist.indexOf(req.header('Origin')) !== -1) {
-//         corsOptions = { origin : true }
-//     } else {
-//         corsOptions = { origin : false }
-//     }
-//     callback(null, corsOptions)
-// }
-// app.use(cors(corsOptionsDelegate))
+const corsOptionsDelegate = function (req, callback) {
+    const allowlist = [`https://fascinating-meringue-45e4dd.netlify.app`]
+    let corsOptions;
+    if (allowlist.indexOf(req.header('Origin')) !== -1) {
+        corsOptions = { origin : true }
+    } else {
+        corsOptions = { origin : false }
+    }
+    callback(null, corsOptions)
+}
+app.use(cors(corsOptionsDelegate))
 
 
 /* TODO Add Your Routes Here */
