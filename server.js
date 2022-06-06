@@ -50,7 +50,7 @@ app.use(express.json());
 
 // Method 3 - comment out line 37 if using, non-functional atm
 const corsOptionsDelegate = function (req, callback) {
-    const allowlist = [`https://fascinating-meringue-45e4dd.netlify.app`]
+    const allowlist = [`https://fascinating-meringue-45e4dd.netlify.app`, `https://cool-kringle-5f7efa.netlify.app`, `http://localhost:4200`]
     let corsOptions;
     if (allowlist.indexOf(req.header('Origin')) !== -1) {
         corsOptions = { origin : true }
