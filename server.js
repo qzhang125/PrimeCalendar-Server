@@ -119,6 +119,17 @@ app.get("/api/user/events/:id", (req, res) =>{
     })
 })
 
+//Get all events
+app.get("/api/user/events", passport.authenticate('jwt', {session: false}),(req, res) => {
+    userService.getAllEvents(req.user._id)  
+    .then((events) =>{
+        res.json(events);
+    })
+    .catch((err)=>{
+        res.json({ "message": err });
+    });
+});
+
 //Delete Event
 app.delete("/api/user/events/:id", passport.authenticate('jwt', {session: false}), (req, res) =>{
     //Hard code the user id for now to avoid JWT issue

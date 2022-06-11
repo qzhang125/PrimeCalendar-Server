@@ -17,12 +17,16 @@ let userSchema = new Schema({
 });
 let eventSchema = new Schema({ 
     eventTitle: String, 
-    startTime: String, 
-    endTime: String, 
-    date: {type: Date, default: Date.now()}, 
-    dayOfWeek: Number,
-    recurring: Boolean,
-    userId: String
+    start: String,
+    end: String,
+    start2 : Date,
+    end2: Date, 
+    description : String,
+    daysOfWeek: Number,
+    startRecur: String,
+    endRecur: String,
+    userId: String,
+    date: {type: Date, default: Date.now()}
 });
 let noteSchema = new Schema({ 
     noteTitle: String,
@@ -240,6 +244,18 @@ module.exports.getEvent = function (eventId) {
     });
 }
 
+//Display all events
+module.exports.getAllEvents = function (id) {
+    return new Promise(function (resolve, reject) {
+        Event.find({userId: id})
+            .exec()
+            .then(user => {
+                resolve(user)
+            }).catch(err => {
+                reject(`Unable to get events for user with id: ${id}`);
+            });
+        });
+}
 
 
 //TIMER
