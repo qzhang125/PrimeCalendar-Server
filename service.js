@@ -22,7 +22,7 @@ let eventSchema = new Schema({
     start2 : Date,
     end2: Date, 
     description : String,
-    daysOfWeek: Number,
+    daysOfWeek: [Number],
     startRecur: String,
     endRecur: String,
     userId: String,
