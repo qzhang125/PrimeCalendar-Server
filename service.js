@@ -26,7 +26,8 @@ let eventSchema = new Schema({
     startRecur: String,
     endRecur: String,
     userId: String,
-    date: {type: Date, default: Date.now()}
+    date: {type: Date, default: Date.now()},
+    recurring: String
 });
 let noteSchema = new Schema({ 
     noteTitle: String,
