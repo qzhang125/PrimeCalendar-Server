@@ -226,12 +226,14 @@ module.exports.updateEvent = function(eventId,eventData){
                         end: eventData.end,
                         description: eventData.description,
                         date: eventData.date,
-                        daysOfWeek : null,
                         recurring: eventData.recurring,
-                        startTime:  null,
-                        endTime: null,
-                        startRecur: null,
-                        endRecur: null
+                        
+                }, $unset:{
+                    startTime:  null,
+                    endTime: null,
+                    startRecur: null,
+                    endRecur: null,
+                    daysOfWeek : null,
                 }
             },{new:true}).exec()
             .then(data=>resolve(data))
