@@ -227,13 +227,37 @@ module.exports.updateEvent = function(eventId,eventData){
                         description: eventData.description,
                         date: eventData.date,
                         daysOfWeek : null,
-                        recurring: eventData.recurring 
+                        recurring: eventData.recurring,
+                        startTime:  null,
+                        endTime: null,
+                        startRecur: null,
+                        endRecur: null
                 }
             },{new:true}).exec()
             .then(data=>resolve(data))
             .catch(err=>reject(`Unable to update event, error: ${err}`))
         }
-        else{
+        else if(eventData.recurring == "daily"){
+            Event.findByIdAndUpdate(eventId,
+                {
+                    $set:{
+                        eventTitle: eventData.eventTitle,
+                        description: eventData.description,
+                        startTime:  eventData.startTime,
+                        endTime: eventData.endTime,
+                        startRecur: eventData.startRecur,
+                        endRecur: eventData.endRecur,
+                        date: eventData.date,
+                        daysOfWeek : null,
+                        recurring: eventData.recurring,
+                        start: null,
+                        end:null
+                }
+            },{new:true}).exec()
+            .then(data=>resolve(data))
+            .catch(err=>reject(`Unable to update event, error: ${err}`))
+        }
+        else if(eventData.recurring == "weekly"){
             Event.findByIdAndUpdate(eventId,
                 {
                     $set:{
@@ -246,6 +270,8 @@ module.exports.updateEvent = function(eventId,eventData){
                         date: eventData.date,
                         daysOfWeek : eventData.daysOfWeek,
                         recurring: eventData.recurring,
+                        start: null,
+                        end:null
                 }
             },{new:true}).exec()
             .then(data=>resolve(data))
