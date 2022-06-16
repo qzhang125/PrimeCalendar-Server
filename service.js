@@ -202,19 +202,55 @@ module.exports.addEvent = function(id,eventData){
         })
     })
 }
-
+// eventTitle: String, 
+// start: String,   //missing
+// end: String,     //missing
+// startTime : Number,
+// endTime : Number,
+// description : String,  //missing
+// daysOfWeek: [Number], 
+// startRecur: String,    //missing
+// endRecur: String,      //missing
+// userId: String,        
+// date: {type: Date, default: Date.now()},
+// recurring: String
 //update event
 module.exports.updateEvent = function(eventId,eventData){
     return new Promise(function(resolve,reject){
-        Event.findByIdAndUpdate(eventId,
-            {$set:{eventTitle: eventData.eventTitle,
-                startTime:  eventData.startTime,
-                endTime: eventData.endTime,
-                date: eventData.date,
-                dayOfWeek : eventData.dayOfWeek,
-                recurring: eventData.recurring }},{new:true}).exec()
-        .then(data=>resolve(data))
-        .catch(err=>reject(`Unable to update event, error: ${err}`))
+        if(eventData.recurring == "none"){
+            Event.findByIdAndUpdate(eventId,
+                {
+                    $set:{
+                        eventTitle: eventData.eventTitle,
+                        start:  eventData.start,
+                        end: eventData.end,
+                        description: eventData.description,
+                        date: eventData.date,
+                        daysOfWeek : null,
+                        recurring: eventData.recurring 
+                }
+            },{new:true}).exec()
+            .then(data=>resolve(data))
+            .catch(err=>reject(`Unable to update event, error: ${err}`))
+        }
+        else{
+            Event.findByIdAndUpdate(eventId,
+                {
+                    $set:{
+                        eventTitle: eventData.eventTitle,
+                        description: eventData.description,
+                        startTime:  eventData.startTime,
+                        endTime: eventData.endTime,
+                        startRecur: eventData.startRecur,
+                        endRecur: eventData.endRecur,
+                        date: eventData.date,
+                        daysOfWeek : eventData.daysOfWeek,
+                        recurring: eventData.recurring,
+                }
+            },{new:true}).exec()
+            .then(data=>resolve(data))
+            .catch(err=>reject(`Unable to update event, error: ${err}`))
+        }
     })
 }
 
