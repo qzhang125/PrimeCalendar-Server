@@ -17,6 +17,7 @@ let userSchema = new Schema({
 });
 let eventSchema = new Schema({ 
     eventTitle: String, 
+    groupId: String,
     start: String,
     end: String,
     startTime : Number,
