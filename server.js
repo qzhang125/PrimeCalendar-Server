@@ -30,7 +30,7 @@ var strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
   if (jwt_payload) {
     next(null, {
       _id: jwt_payload._id,
-      email: jwt_payload.email,
+      userName: jwt_payload.userName,
       password: jwt_payload.password,
     });
   } else {
@@ -91,7 +91,7 @@ app.post("/api/user/login", (req, res) => {
       let token = jwt.sign(
         {
           _id: user._id,
-          email: user.email,
+          userName: user.userName,
         },
         jwtOptions.secretOrKey
       );
@@ -128,9 +128,9 @@ async function sendMail(user, callback) {
   // send mail with defined transport object
   let info = await transporter.sendMail({
     from: "dbhuti95@gmail.com",
-    to: user.email,
+    to: user.userName,
     subject: "Welcome to Prime Calendar",
-    html: `<h1>${user.email}</h1><br>
+    html: `<h1>${user.userName}</h1><br>
         <h4>Thank you for joining Prime Calendar.</h4>`,
   });
   callback(info);

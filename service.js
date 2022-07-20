@@ -7,7 +7,7 @@ let mongoDBConnectionString = process.env.MONGO_URL;
 
 let Schema = mongoose.Schema;
 let userSchema = new Schema({
-  email: { type: String, require: true, unique: true },
+  userName: { type: String, require: true, unique: true },
   password: String,
   eventId: [String],
   noteId: [String],
@@ -76,7 +76,7 @@ module.exports.registerUser = function (userData) {
   return new Promise(function (resolve, reject) {
     if (userData.password != userData.password2) {
       reject("Passwords do not match");
-    } else if (validator.validate(userData.email) == false) {
+    } else if (validator.validate(userData.userName) == false) {
       reject("Invalid email");
     } else {
       bcrypt
@@ -92,7 +92,7 @@ module.exports.registerUser = function (userData) {
                 reject("There was an error creating the user: " + err);
               }
             } else {
-              resolve("User " + userData.email + " successfully registered");
+              resolve("User " + userData.userName + " successfully registered");
             }
           });
         })
@@ -103,20 +103,20 @@ module.exports.registerUser = function (userData) {
 
 module.exports.checkUser = function (userData) {
   return new Promise(function (resolve, reject) {
-    User.findOne({ email: userData.email })
+    User.findOne({ userName: userData.userName })
       .exec()
       .then((user) => {
         bcrypt.compare(userData.password, user.password).then((res) => {
           if (res === true) {
             resolve(user);
           } else {
-            reject("Incorrect password for user " + userData.email);
+            reject("Incorrect password for user " + userData.userName);
           }
         });
       })
       .catch((err) => {
         console.log(err);
-        reject("Unable to find user " + userData.email);
+        reject("Unable to find user " + userData.userName);
       });
   });
 };
