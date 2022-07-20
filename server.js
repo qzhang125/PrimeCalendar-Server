@@ -91,7 +91,7 @@ app.post("/api/user/login", (req, res) => {
       let token = jwt.sign(
         {
           _id: user._id,
-          email: user.useemailrName,
+          email: user.email,
         },
         jwtOptions.secretOrKey
       );
@@ -120,8 +120,8 @@ async function sendMail(user, callback) {
     port: 587,
     secure: false, // true for 465, false for other ports
     auth: {
-      user: user.email, // generated gmail user
-      pass: user.password, //// generated gmail user
+      user: process.env.businessEmail, // generated gmail user
+      pass: process.env.businessPassword, //// generated gmail user
     },
   });
 
