@@ -11,6 +11,7 @@ const app = express();
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 const nodeMailer = require("nodemailer");
+const crypto = require("crypto")
 
 const userService = require("./service.js");
 const SendmailTransport = require("nodemailer/lib/sendmail-transport");
@@ -114,6 +115,71 @@ app.post("/api/user/regmail", (req, res) => {
   });
 });
 
+app.post("/api/user/changepassword", (req, res) => {
+  userService.checkUserName(req.body).then((user)=>{
+  console.log("email address: "+ user.userName);
+  
+  //Set resetToken and expiration
+  const token = crypto.randomBytes(20).toString('hex');
+  userService.updateUser(user,{
+    resetPasswordToken:token,
+    resetPasswordExpires: Date.now() + 3600000,
+  }).then((user)=>{
+    console.log(user);
+  
+  //Nodemailer transporter
+  const transporter = nodeMailer.createTransport({
+    host: "smtp.gmail.com",
+    service: "gmail",
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: `${process.env.businessEmail}`, // generated gmail user
+      pass: `${process.env.businessPassword}`, //// generated gmail user
+    },
+  })
+
+  //mail options
+  const mailOptions = {
+    from: '"Prime Calendar" <team2prj@gmail.com>',
+    to:`${user.userName}`,
+    subject:`Link to Reset Password`,
+    text:
+    `Dear User: \n\n` +
+    `You are receiving this email because you have requested the reset of the password for your account. \n\n` +
+    `Please click on the following link to update your password: \n\n` +
+    `http://localhost:4200/reset/${token} \n\n` +
+    `If you did ot request this, please ignore this email and your password will remain unchanged. \n`
+  }
+
+  //sending email
+  transporter.sendMail(mailOptions,function(err,response){
+    if(err){
+      console.log(err);
+    }else{
+      console.log("sending successful: "+response)
+      res.json({ userName:  user.userName});
+    }
+  })
+  }).catch((err)=>{console.log(err)})
+
+  }).catch((err)=>{
+    console.log(err);
+    res.status(422).json({ message: err });
+  });
+});
+
+app.get("/api/user/checkToken/:token", (req, res) => {
+  console.log(req.params.token);
+  userService.checkToken(req.params.token).then((user)=>{
+    console.log("user token: "+ user.resetPasswordToken);
+    res.json({ user:user,message: "reset link is ok" });
+  }).catch((err)=>{
+    console.log(err);
+    res.json({ message: err });
+  });
+});
+
 async function sendMail(user, callback) {
   //create transporter object using default SMTP transport
   let transporter = nodeMailer.createTransport({
@@ -138,7 +204,11 @@ async function sendMail(user, callback) {
   callback(info);
   console.log("Message sent: %s", info.messageId);
 }
-sendMail().catch(console.error);
+//sendMail().catch(console.error);
+
+
+
+
 //add event
 app.post(
   "/api/user/events/add",

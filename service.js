@@ -12,6 +12,8 @@ let userSchema = new Schema({
   eventId: [String],
   noteId: [String],
   timerId: [String],
+  resetPasswordToken: String,
+  resetPasswordExpires: Number
 });
 let eventSchema = new Schema({
   eventTitle: String,
@@ -117,6 +119,51 @@ module.exports.checkUser = function (userData) {
       .catch((err) => {
         console.log(err);
         reject("Unable to find user " + userData.userName);
+      });
+  });
+};
+
+module.exports.checkUserName = function (userData) {
+  return new Promise(function (resolve, reject) {
+    User.findOne({ userName: userData.userName })
+      .exec()
+      .then((user) => {
+            console.log("find username: "+user.userName)
+            resolve(user);
+        })
+      .catch((err) => {
+        console.log(err);
+        reject("Unable to find user " + userData.userName);
+      });
+  });
+};
+
+module.exports.updateUser = function (user,updateData) {
+  return new Promise(function (resolve, reject) {
+    User.findOneAndUpdate({ userName: user.userName },updateData,{ new: true })
+      .exec()
+      .then((user) => {
+            console.log("updated: "+ user.userName)
+            resolve(user);
+        })
+      .catch((err) => {
+        console.log(err);
+        reject("Unable to update user " + userData.userName);
+      });
+  });
+};
+
+module.exports.checkToken = function (token) {
+  return new Promise(function (resolve, reject) {
+    User.findOne({ resetPasswordToken: token, resetPasswordExpires:{$gt: Date.now()}})
+      .exec()
+      .then((user) => {
+            console.log("find username: "+user.userName)
+            resolve(user);
+        })
+      .catch((err) => {
+        console.log(err);
+        reject("Unable to find user token");
       });
   });
 };
