@@ -104,9 +104,10 @@ app.post("/api/user/login", (req, res) => {
 });
 
 //Send mail
-app.post("/api/user/sendmail", (req, res) => {
+app.post("/api/user/regmail", (req, res) => {
   console.log("email request came");
   let user = req.body;
+
   sendMail(user, (info) => {
     console.log(`The mail has been sent`);
     res.send(info);
@@ -117,6 +118,7 @@ async function sendMail(user, callback) {
   //create transporter object using default SMTP transport
   let transporter = nodeMailer.createTransport({
     host: "smtp.gmail.com",
+    service: "gmail",
     port: 587,
     secure: false, // true for 465, false for other ports
     auth: {
@@ -127,8 +129,8 @@ async function sendMail(user, callback) {
 
   // send mail with defined transport object
   let info = await transporter.sendMail({
-    from: "dbhuti95@gmail.com",
-    to: user.userName,
+    from: '"Prime Calendar" <team2prj@gmail.com>', // sender address
+    to: `${user.userName}`,
     subject: "Welcome to Prime Calendar",
     html: `<h1>${user.userName}</h1><br>
         <h4>Thank you for joining Prime Calendar.</h4>`,
