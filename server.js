@@ -206,6 +206,18 @@ async function sendMail(user, callback) {
 }
 //sendMail().catch(console.error);
 
+//update password
+app.put("/api/user/passwordChange/:id", (req, res) => {
+
+  userService
+    .updateUserPass(req.params.id, req.body)
+    .then((event) => {
+      res.json(event);
+    })
+    .catch((err) => {
+      res.json({ message: err });
+    });
+});
 
 
 

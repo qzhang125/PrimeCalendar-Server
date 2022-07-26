@@ -153,6 +153,33 @@ module.exports.updateUser = function (user,updateData) {
   });
 };
 
+module.exports.updateUserPass = function (user,updateData) {
+  return new Promise(function (resolve, reject) {
+    bcrypt
+  .hash(updateData.password, 10)
+  .then((hash) => { 
+    updateData.password = hash})
+    .then(()=>User.findOneAndUpdate(
+      { userName: user },
+      {$set: {
+        password: updateData.password,
+      }},
+      { new: true })
+    )
+      .exec()
+      .then((user) => {
+            console.log("updated pass: "+ user)
+            resolve(user);
+        })
+    
+      .catch((err) => {
+        console.log(err);
+        reject("Unable to update user pass " + user);
+      });
+  });
+};
+
+
 module.exports.checkToken = function (token) {
   return new Promise(function (resolve, reject) {
     User.findOne({ resetPasswordToken: token, resetPasswordExpires:{$gt: Date.now()}})
