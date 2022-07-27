@@ -148,7 +148,7 @@ app.post("/api/user/changepassword", (req, res) => {
     `Dear User: \n\n` +
     `You are receiving this email because you have requested the reset of the password for your account. \n\n` +
     `Please click on the following link to update your password: \n\n` +
-    `http://localhost:4200/reset/${token} \n\n` +
+    `https://fascinating-meringue-45e4dd.netlify.app/reset/${token} \n\n` +
     `If you did ot request this, please ignore this email and your password will remain unchanged. \n`
   }
 
